@@ -5,7 +5,6 @@ version = "1.0.0-DEV"
 
 [deps]
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
-HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 MetaGraphs = "626554b9-1ddb-594c-aa3c-2596fe9399a5"
 OntologyLookup = "3c35c355-0acb-4572-93be-ae4d2e4cf8bf"
 STRINGdb = "74a80de1-bd6a-4f9a-8ba7-e671a0fc0c09"
@@ -13,11 +12,10 @@ TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 
 [compat]
-HTTP = "1"
-TestItemRunner = "1"
-MetaGraphs = "0.7"
-TestItems = "1"
 Graphs = "1"
+MetaGraphs = "0.7"
+TestItemRunner = "1"
+TestItems = "1"
 julia = "1.6.7"
 
 [extras]
