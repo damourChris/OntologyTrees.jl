@@ -15,6 +15,16 @@ function set_gene_props!(graph::MetaGraphs.MetaDiGraph, gene::String,
                            :type => :gene,
                            :expression => missing))
 end
+
+function is_term_in_graph(graph::MetaGraphs.MetaDiGraph, term::Term)
+    try
+        graph[term.obo_id, :id]
+        return true
+    catch
+        return false
+    end
+end
+
 function set_gene_props!(graph::MetaGraphs.MetaDiGraph, gene::Tuple{String,Float64},
                          vertex_id::Int)::Bool
     return set_props!(graph, vertex_id,
