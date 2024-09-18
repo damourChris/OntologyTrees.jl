@@ -63,9 +63,11 @@ jobs:
           version: '1'
       
       - name: Add SysBioRegistry
-        shell: julia --project --color=yes {0}
+        shell: julia --project=docs --color=yes {0}
         run:  |
           using Pkg 
+          # Add the general and the custom registry
+          Pkg.Registry.add(RegistrySpec(url="https://github.com/juliaregistries/general"))
           Pkg.Registry.add(RegistrySpec(url="https://github.com/damourChris/SysBioRegistry.jl"))
       - uses: julia-actions/cache@v2          
       - name: Configure doc environment
