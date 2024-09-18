@@ -5,5 +5,6 @@
     "image": "mcr.microsoft.com/devcontainers/base:bullseye",
     "features": {
         "ghcr.io/julialang/devcontainer-features/julia:1": {}
-    }
+    },
+    "postCreateCommand": "julia --project=. -e 'using Pkg; Pkg.instantiate(); pkg\"registry add https://github.com/damourChris/SysBioRegistry.jl\"'"
 }
