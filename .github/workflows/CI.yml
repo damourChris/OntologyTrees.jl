@@ -39,8 +39,7 @@ jobs:
       - name: Add SysBioRegistry
         shell: julia --project --color=yes {0}
         run:  |
-          using Pkg 
-          Pkg.instantiate()
+          using Pkg          
           pkg"registry add https://github.com/damourChris/SysBioRegistry.jl"
       - uses: julia-actions/cache@v2
       - uses: julia-actions/julia-buildpkg@v1
@@ -68,7 +67,6 @@ jobs:
         shell: julia --project --color=yes {0}
         run:  |
           using Pkg 
-          Pkg.instantiate()
           pkg"registry add https://github.com/damourChris/SysBioRegistry.jl"
       - uses: julia-actions/cache@v2          
       - name: Configure doc environment
