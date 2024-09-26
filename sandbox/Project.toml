@@ -1,0 +1,12 @@
+[deps]
+CondaPkg = "992eb4ea-22a4-4c89-a5bb-47a3300528ab"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+JSON3 = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
+MetaGraphs = "626554b9-1ddb-594c-aa3c-2596fe9399a5"
+OntologyLookup = "3c35c355-0acb-4572-93be-ae4d2e4cf8bf"
+OntologyTrees = "66aab7ce-4ed8-4c2b-b8f5-3ecb1547f657"
+Preferences = "21216c6a-2e73-6563-6e65-726566657250"
+RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
+STRINGdb = "74a80de1-bd6a-4f9a-8ba7-e671a0fc0c09"
+TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
+UUIDs = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
