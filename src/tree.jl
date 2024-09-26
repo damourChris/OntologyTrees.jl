@@ -80,9 +80,6 @@ function expand_graph!(graph, cur_node, base_term;
         cur_node_parents = [cur_node_parents]
     end
 
-    # Save the current state of the graph (the nodes ids and edges ids) to a file for debugin
-    save_graph_state(graph, "graph_state.json")
-
     cur_node_index = graph[cur_node.obo_id, :id]
 
     if ismissing(cur_node) || all(ismissing.(cur_node_parents))
