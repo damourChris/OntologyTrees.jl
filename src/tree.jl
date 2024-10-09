@@ -77,7 +77,7 @@ function expand_graph!(graph, cur_node, base_term;
     end
 
     cur_node_parents = get_hierarchical_parent(cur_node;
-                                               return_unique_parent=allow_multiple_roots,
+                                               return_unique_parent=!allow_multiple_roots,
                                                preferred_parent=preferred_parents,
                                                include_UBERON=include_UBERON)
     if (isa(cur_node_parents, AbstractArray) && length(cur_node_parents) == 0)
