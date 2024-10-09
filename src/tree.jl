@@ -20,7 +20,8 @@ function OntologyTree(base_term::Term,
 
     populate(graph, base_term, required_terms; include_UBERON, allow_multiple_roots)
 
-    return OntologyTree(graph, base_term, required_terms, max_parent_limit, include_UBERON)
+    return OntologyTree(graph, base_term, required_terms, allow_multiple_roots,
+                        max_parent_limit, include_UBERON)
 end
 
 function populate(graph::MetaGraphs.MetaDiGraph, base_term::Term,
