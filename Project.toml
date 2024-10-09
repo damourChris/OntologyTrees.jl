@@ -1,7 +1,7 @@
 name = "OntologyTrees"
 uuid = "66aab7ce-4ed8-4c2b-b8f5-3ecb1547f657"
 authors = ["Chris Damour"]
-version = "1.1.1"
+version = "1.2.0"
 
 [deps]
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
