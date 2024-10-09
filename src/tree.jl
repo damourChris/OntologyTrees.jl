@@ -2,13 +2,15 @@ struct OntologyTree
     graph::MetaGraphs.MetaDiGraph
     base_term::Term
     required_terms::Vector{Term}
+    allow_multiple_roots::Bool
     max_parent_limit::Int
     include_UBERON::Bool
 end
 
 function OntologyTree(base_term::Term,
                       required_terms::Vector{Term}=[];
-                      max_parent_limit::Int=5, include_UBERON::Bool=false)
+                      max_parent_limit::Int=5, allow_multiple_roots::Bool=false,
+                      include_UBERON::Bool=false)
     graph = MetaDiGraph()
 
     # We can modify the indexing of the graph to be more efficient
@@ -16,7 +18,7 @@ function OntologyTree(base_term::Term,
     # We can use this to index the nodes
     set_indexing_prop!(graph, :id)
 
-    populate(graph, base_term, required_terms; include_UBERON)
+    populate(graph, base_term, required_terms; include_UBERON, allow_multiple_roots)
 
     return OntologyTree(graph, base_term, required_terms, max_parent_limit, include_UBERON)
 end
@@ -24,6 +26,7 @@ end
 function populate(graph::MetaGraphs.MetaDiGraph, base_term::Term,
                   required_terms::Vector{Term};
                   include_UBERON::Bool=false,
+                  allow_multiple_roots::Bool=false,
                   check_parent_limit::Int=5)::Nothing
     # Add the base term to the graph
     add_vertex!(graph)
@@ -36,6 +39,7 @@ function populate(graph::MetaGraphs.MetaDiGraph, base_term::Term,
 
     for (_, node) in enumerate(required_terms)
         populate_required_term(graph, node, base_term;
+                               allow_multiple_roots=allow_multiple_roots,
                                check_parent_limit=check_parent_limit, include_UBERON)
     end
 end
@@ -47,17 +51,20 @@ function get_terms_nodes_indices(graph::MetaGraphs.MetaDiGraph)::Vector{Int}
 end
 
 function populate_required_term(graph::MetaGraphs.MetaDiGraph, term::Term, base_term::Term;
-                                check_parent_limit::Int=5, include_UBERON::Bool)::Nothing
+                                check_parent_limit::Int=5, allow_multiple_roots::Bool=false,
+                                include_UBERON::Bool)::Nothing
     # While the parents list doesnt contain the base node, keep getting the hiercahical parents
     cur_node = term # Start with the current node
 
     @debug "Currently on node: $(cur_node.label)"
     return expand_graph!(graph, cur_node, base_term;
+                         allow_multiple_roots=allow_multiple_roots,
                          check_parent_limit=check_parent_limit, include_UBERON)
 end
 
 function expand_graph!(graph, cur_node, base_term;
                        preferred_parents::Vector{Term}=[base_term],
+                       allow_multiple_roots::Bool=false,
                        check_parent_limit::Int=5, include_UBERON::Bool)::Nothing
     if check_parent_limit == 0
         @warn "Parent limit reached. Stopping."
@@ -69,7 +76,7 @@ function expand_graph!(graph, cur_node, base_term;
     end
 
     cur_node_parents = get_hierarchical_parent(cur_node;
-                                               return_unique_parent=false,
+                                               return_unique_parent=allow_multiple_roots,
                                                preferred_parent=preferred_parents,
                                                include_UBERON=include_UBERON)
     if (isa(cur_node_parents, AbstractArray) && length(cur_node_parents) == 0)
