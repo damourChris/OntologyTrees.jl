@@ -24,6 +24,16 @@ function OntologyTree(base_term::Term,
                         max_parent_limit, include_UBERON)
 end
 
+# Custom display for the OntologyTree
+import Base.show
+function Base.show(io::IO, tree::OntologyTree)
+    println(io, "OntologyTree with base term: $(tree.base_term.label)")
+    println(io, "Number of required terms: $(length(tree.required_terms))")
+    println(io, "Number of nodes: $(nv(tree.graph))")
+    println(io, "Number of edges: $(ne(tree.graph))")
+    return println(io, "Number of components: $(length(connected_components(tree.graph)))")
+end
+
 function populate(graph::MetaGraphs.MetaDiGraph, base_term::Term,
                   required_terms::Vector{Term};
                   include_UBERON::Bool=false,
