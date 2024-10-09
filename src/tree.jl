@@ -8,8 +8,8 @@ struct OntologyTree
 end
 
 function OntologyTree(base_term::Term,
-                      required_terms::Vector{Term}=[];
-                      max_parent_limit::Int=5, allow_multiple_roots::Bool=false,
+                      required_terms::Vector{Term}=[], terms_to_exclude::Vector{Term}=[];
+                      max_parent_limit::Int=100, allow_multiple_roots::Bool=false,
                       include_UBERON::Bool=false)
     graph = MetaDiGraph()
 
@@ -18,7 +18,9 @@ function OntologyTree(base_term::Term,
     # We can use this to index the nodes
     set_indexing_prop!(graph, :id)
 
-    populate(graph, base_term, required_terms; include_UBERON, allow_multiple_roots)
+    populate(graph, base_term, required_terms, terms_to_exclude; include_UBERON,
+             check_parent_limit=max_parent_limit, allow_multiple_roots=
+             allow_multiple_roots)
 
     return OntologyTree(graph, base_term, required_terms, allow_multiple_roots,
                         max_parent_limit, include_UBERON)
@@ -35,10 +37,10 @@ function Base.show(io::IO, tree::OntologyTree)
 end
 
 function populate(graph::MetaGraphs.MetaDiGraph, base_term::Term,
-                  required_terms::Vector{Term};
+                  required_terms::Vector{Term}, terms_to_exclude::Vector{Term};
                   include_UBERON::Bool=false,
                   allow_multiple_roots::Bool=false,
-                  check_parent_limit::Int=5)::Nothing
+                  check_parent_limit::Int=500)::Nothing
     # Add the base term to the graph
     add_vertex!(graph)
     set_term_props!(graph, base_term, 1)
@@ -49,7 +51,7 @@ function populate(graph::MetaGraphs.MetaDiGraph, base_term::Term,
     end
 
     for (_, node) in enumerate(required_terms)
-        populate_required_term(graph, node, base_term;
+        populate_required_term(graph, node, base_term, terms_to_exclude;
                                allow_multiple_roots=allow_multiple_roots,
                                check_parent_limit=check_parent_limit, include_UBERON)
     end
@@ -61,22 +63,25 @@ function get_terms_nodes_indices(graph::MetaGraphs.MetaDiGraph)::Vector{Int}
             if haskey(v_props, :term)]
 end
 
-function populate_required_term(graph::MetaGraphs.MetaDiGraph, term::Term, base_term::Term;
+function populate_required_term(graph::MetaGraphs.MetaDiGraph, term::Term, base_term::Term,
+                                terms_to_exclude::Vector{Term};
                                 check_parent_limit::Int=5, allow_multiple_roots::Bool=false,
                                 include_UBERON::Bool)::Nothing
     # While the parents list doesnt contain the base node, keep getting the hiercahical parents
     cur_node = term # Start with the current node
 
     @debug "Currently on node: $(cur_node.label)"
-    return expand_graph!(graph, cur_node, base_term;
+    return expand_graph!(graph, cur_node, base_term, terms_to_exclude;
                          allow_multiple_roots=allow_multiple_roots,
                          check_parent_limit=check_parent_limit, include_UBERON)
 end
 
-function expand_graph!(graph, cur_node, base_term;
+function expand_graph!(graph, cur_node, base_term, terms_to_exclude;
                        preferred_parents::Vector{Term}=[base_term],
                        allow_multiple_roots::Bool=false,
-                       check_parent_limit::Int=5, include_UBERON::Bool)::Nothing
+                       check_parent_limit::Int=500, include_UBERON::Bool)::Nothing
+    check_parent_limit = check_parent_limit - 1
+
     if check_parent_limit == 0
         @warn "Parent limit reached. Stopping."
         return
@@ -86,8 +91,15 @@ function expand_graph!(graph, cur_node, base_term;
         return
     end
 
+    # Include any existing nodes in the preferred_parents list
+    cur_terms = [graph.vprops[v_index][:term]
+                 for v_index in vertices(graph) if graph.vprops[v_index][:type] == :term]
+    preferred_parents = sort([preferred_parents;
+                              cur_terms]; by=x -> x.obo_id)
+
     cur_node_parents = get_hierarchical_parent(cur_node;
                                                return_unique_parent=!allow_multiple_roots,
+                                               terms_to_exclude=terms_to_exclude,
                                                preferred_parent=preferred_parents,
                                                include_UBERON=include_UBERON)
     if (isa(cur_node_parents, AbstractArray) && length(cur_node_parents) == 0)
@@ -127,9 +139,9 @@ function expand_graph!(graph, cur_node, base_term;
         set_term_props!(graph, parent, cur_parent_index)
 
         @debug "Expanding parent: $(parent.label)"
-        expand_graph!(graph, parent, base_term;
+        expand_graph!(graph, parent, base_term, terms_to_exclude;
                       include_UBERON=include_UBERON,
-                      check_parent_limit=check_parent_limit - 1)
+                      check_parent_limit=check_parent_limit)
     end
 
     return nothing
